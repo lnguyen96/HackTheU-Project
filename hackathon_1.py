@@ -175,10 +175,10 @@ for jjj in range(num_months):
 		ee[jjj][j] = eee
 		r.stored_energy[0] -= eee
 
-	print('kWh left in reserve: ', r.stored_energy[0])
+	# print('kWh left in reserve: ', r.stored_energy[0])
 
 	# plot or don't plot. cause I don't want to plot this every time 
-	condition = 0
+	condition = 1
 	plotornot(condition, e.spending, e.how_much, e.size)
 
 	# Take energy from other houses
@@ -194,13 +194,14 @@ for jjj in range(num_months):
 			e.how_much[j] -= e.how_much[j]*factor
 			# e.spending[j] += e.spending[j]*factor
 		r.stored_energy[0] += num_give_back
-		print(sum(factor_track))
+		# print(sum(factor_track))
+		
 		# If negative in the reserve, after the conditional for loop above, this number below should be 0
-		print(r.stored_energy[0])
+		# print(r.stored_energy[0])
 
 	# reset vals
 	e.how_much, e.spending = [], []
 
-# Show plotted change over time
-plot_grow(ee)
+# Show plotted change over time (just doing one change of size)
+plot_grow(ee[0])
 
