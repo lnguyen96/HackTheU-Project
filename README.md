@@ -11,7 +11,7 @@ Since our project only uses python3, those will currently be the only files you 
 If you wish to generate the visuals used in our project, change your current directory to our copy of HackTheU Project and run the command 
 
 ```
-python hackathon1.py
+python hackathon1_.py
 ```
 
 ## Authors
