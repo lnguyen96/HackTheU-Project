@@ -12,4 +12,11 @@ If you wish to generate the visuals used in our project, change your current dir
 
 ```
 python hackathon1.py
-``` 
+```
+
+## Authors
+
+* **Long Nguyen** - University of Colorado Boulder
+* **Edwin Chiang** - University of Colorado Boulder
+* **Niklaus Parcell** - University of Utah
+* **Deron Parcell** - University of Utah 
