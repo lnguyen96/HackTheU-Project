@@ -8,15 +8,13 @@ import matplotlib.pyplot as plt
 
 
 class energy_usage():
-
 	def __init__(self):
 		self.size = 0
-		self.how_much = []
+		self.how_much = []  # how much energy at a house
 		self.spending = []
 		self.money_down = 0
 
 class energy_reserve():
-
 	def __init__(self):
 		self.stored_energy = []
 
@@ -28,7 +26,6 @@ def setup_houses(N):
 		neighborhood.append(rand_num)
 
 	return neighborhood
-
 
 # On average, I found that a house uses probably around 30kwh power a day. Maybe create a range based on how large the household is, and then estimate how much energy they are using
 def use_energy(n):
@@ -46,7 +43,7 @@ def money_to_energy():
 
 def pull_energy(N):  # N is the money put in per month
 	# amount to pull
-	am_to_pull = N + random.randint(1, 10)  # kWh
+	am_to_pull = N + random.randint(-10, 10)  # kWh
 	return am_to_pull
 
 def give_energy():
@@ -55,7 +52,18 @@ def give_energy():
 def cost():
 	return 
 
-###############################################################
+def plotornot(cond, espend, ehow, es):
+	if condition == 1:
+		plt.figure()
+		plt.bar(y_pos, espend, align = 'center', alpha = 0.5, color = 'g')
+		plt.bar(y_pos, ehow, align = 'center', alpha = 0.5, color = 'b')
+		plt.bar(y_pos, es, align = 'center', alpha = 0.5, color = 'r')
+		plt.xlabel('house #')
+		plt.ylabel('numerical value')
+		plt.legend(('($)', 'kWh', '#people in a house'))
+		plt.show()
+
+##############################################################
 
 how_many_houses = 10
 num_reserves = 1
@@ -74,7 +82,6 @@ for j in range(num_reserves):
 	r.stored_energy.append(sum(e.spending)/USD_kWh)
 
 
-
 print('num people per house: ', e.size)
 print('energy: ', e.how_much, 'kWh')
 print('money spent in a house: $', e.spending)
@@ -82,17 +89,9 @@ print('stored energy in reserve: ', r.stored_energy, 'kWh')
 
 y_pos = np.arange(len(e.size))
 
-condition = 0  # plot or don't plot. cause I don't want to plot this every time 
-if condition == 1:
-	plt.figure()
-	plt.bar(y_pos, e.spending, align = 'center', alpha = 0.5, color = 'g')
-	plt.bar(y_pos, e.how_much, align = 'center', alpha = 0.5, color = 'b')
-	plt.bar(y_pos, e.size, align = 'center', alpha = 0.5, color = 'r')
-	plt.xlabel('which house')
-	plt.ylabel('how much')
-	plt.legend(('($)', 'kWh', '#people in a house'))
-	plt.show()
-
+# plot or don't plot. cause I don't want to plot this every time 
+condition = 1
+plotornot(condition, e.spending, e.how_much, e.size)
 
 
 # Start a new loop, which does the pulling of energy, and the giving of energy
@@ -101,7 +100,6 @@ for j in range(len(e.size)):
 	r.stored_energy[0] -= ee
 
 print('kWh left in reserve: ', r.stored_energy[0])
-
 
 
 # Take energy from other houses
@@ -115,12 +113,13 @@ if r.stored_energy[0] < 0:
 		factor_track.append(factor)
 		num_give_back += -r.stored_energy[0]*factor
 		e.how_much[j] -= e.how_much[j]*factor
+		# e.spending[j] += e.spending[j]*factor
 	r.stored_energy[0] += num_give_back
 
 	print(sum(factor_track))
 
-# If negative in the reserve, after the conditional for loop above, this number below should be 0
-print(r.stored_energy[0])
+	# If negative in the reserve, after the conditional for loop above, this number below should be 0
+	print(r.stored_energy[0])
 
 
 
