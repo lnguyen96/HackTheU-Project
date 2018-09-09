@@ -5,6 +5,7 @@
 import numpy as np 
 import random
 import matplotlib.pyplot as plt 
+from matplotlib.animation import FuncAnimation 
 
 
 class energy_usage():
@@ -54,14 +55,80 @@ def cost():
 
 def plotornot(cond, espend, ehow, es):
 	if condition == 1:
+		n_groups = 10
+		index = np.arange(n_groups)
+		bar_width = 0.3
+		opacity = 0.8
 		plt.figure()
-		plt.bar(y_pos, espend, align = 'center', alpha = 0.5, color = 'g')
-		plt.bar(y_pos, ehow, align = 'center', alpha = 0.5, color = 'b')
-		plt.bar(y_pos, es, align = 'center', alpha = 0.5, color = 'r')
+		# plt.bar(y_pos, espend, align = 'center', alpha = 0.5, color = 'g')
+		# plt.bar(y_pos, ehow, align = 'center', alpha = 0.5, color = 'b')
+		# plt.bar(y_pos, es, align = 'center', alpha = 0.5, color = 'r')
+		plt.bar(index, espend, bar_width, alpha = opacity, color = 'g', label='$')
+		plt.bar(index + bar_width, ehow, bar_width, alpha = opacity, color = 'b', label = 'kWh')
+		plt.bar(index + 2*bar_width, es, bar_width, alpha = opacity, color = 'r', label = '#people in a house')
 		plt.xlabel('house #')
 		plt.ylabel('numerical value')
 		plt.legend(('($)', 'kWh', '#people in a house'))
+		plt.tight_layout()
 		plt.show()
+
+def plot_grow(growth):
+
+	for j in range(len(growth)):
+		growth[j] *= 30
+	# Create new figure and axes which fill it
+	fig = plt.figure(figsize=(6,6))
+	ax = fig.add_axes([0, 0, 1, 1], frameon = False)
+	ax.set_xlim(-1.5, 1.5), ax.set_xticks([])
+	ax.set_ylim(-1.5, 1.5), ax.set_yticks([])
+
+	# Create "rain" data
+	n_drops = 10
+	rain_drops = np.zeros(n_drops, dtype = [('position', float, 2), ('size', float, 1), ('growth', float, 1), ('color', float, 4)])
+
+	# Initialize raindrops in (non-random) positions and with random growth rates
+	pos1 = (np.sqrt(3)/2, 1/2)
+	pos2 = (1/2, np.sqrt(3)/2)
+	pos3 = (0, 1)
+	pos4 = (-1/2, np.sqrt(3)/2)
+	pos5 = (-np.sqrt(3)/2, 1/2)
+	pos6 = (-np.sqrt(3)/2, -1/2)
+	pos7 = (-1/2, -np.sqrt(3)/2)
+	pos8 = (0, -1)
+	pos9 = (1/2, -np.sqrt(3)/2)
+	pos10 = (np.sqrt(3)/2, -1/2)
+	xs = [np.sqrt(3)/2, 1/2, 0, -1/2, -np.sqrt(3)/2, -np.sqrt(3)/2, -1/2, 0, 1/2, np.sqrt(3)/2]
+	ys = [1/2, np.sqrt(3)/2, 1, np.sqrt(3)/2, 1/2, -1/2, -np.sqrt(3)/2, -1, -np.sqrt(3)/2, -1/2]
+	positions = [xs, ys]
+	for j in range(n_drops):
+		rain_drops['position'][j] = (xs[j], ys[j])
+	# print(rain_drops['position'])
+	rain_drops['size'] = growth
+
+	# Construct the 'scatter' of each 'drop'
+	scat = ax.scatter(rain_drops['position'][:,0], rain_drops['position'][:,1], s = rain_drops['size'], lw = 0.5, edgecolors = rain_drops['color'], facecolors = 'none')
+
+	def update(frame_number):
+		# index to re-spawn 'oldest' raindrop
+		curr_index = frame_number % n_drops
+
+		# Change circle size
+		rain_drops['size'] = growth
+
+		# Re-position
+		for j in range(n_drops):
+			rain_drops['position'][j] = (xs[j], ys[j]) 
+		rain_drops['size'][curr_index] = 1
+		rain_drops['color'][curr_index] = (0, 0, 0, 1)
+		rain_drops['growth'][curr_index] = 0
+
+		# Update scatter collection
+		scat.set_edgecolors(rain_drops['color'])
+		# scat.set_sizes(rain_drops['size'])
+		# scat.set_offsets(rain_drops['position'])
+
+	animation = FuncAnimation(fig, update, interval = 200)
+	plt.show()
 
 ##############################################################
 
@@ -71,55 +138,69 @@ num_reserves = 1
 # Define $/kwh
 USD_kWh = 1.27  # as USD_kWh increases, so does the amount that is stored in the tank
 
+# Constructor
 e = energy_usage()  # house
-e.size = setup_houses(how_many_houses)
-
-r = energy_reserve()
-for j in range(num_reserves):
-	for jj in range(len(e.size)):
-		e.how_much.append(int(use_energy(e.size[jj])))
-		e.spending.append(int(money_to_energy()))
-	r.stored_energy.append(sum(e.spending)/USD_kWh)
 
 
-print('num people per house: ', e.size)
-print('energy: ', e.how_much, 'kWh')
-print('money spent in a house: $', e.spending)
-print('stored energy in reserve: ', r.stored_energy, 'kWh')
+# print('num people per house: ', e.size)
+# print('energy: ', e.how_much, 'kWh')
+# print('money spent in a house: $', e.spending)
+# print('stored energy in reserve: ', r.stored_energy, 'kWh')
 
-y_pos = np.arange(len(e.size))
-
-# plot or don't plot. cause I don't want to plot this every time 
-condition = 1
-plotornot(condition, e.spending, e.how_much, e.size)
 
 
 # Start a new loop, which does the pulling of energy, and the giving of energy
-for j in range(len(e.size)):
-	ee = pull_energy(e.how_much[j])
-	r.stored_energy[0] -= ee
+e = energy_usage()
+e.size = setup_houses(how_many_houses)
+e_rem = e.size
+r = energy_reserve()
 
-print('kWh left in reserve: ', r.stored_energy[0])
+num_months = 12
 
+ee = np.zeros((num_months, how_many_houses))
 
-# Take energy from other houses
-"Since each house has a percentage that they pay to the pool of $$ for the reserve, first take a percentage of what the $$ is to the pool for each house (factor), then multiply by how much to give back to the reserve, which should be negative"
-if r.stored_energy[0] < 0:
-	factor = 0
-	factor_track = []
-	num_give_back = 0
+for jjj in range(num_months):
+
+	for j in range(num_reserves):
+		for jj in range(len(e.size)):
+			e.spending.append(int(money_to_energy()))
+			e.how_much.append(int(use_energy(e.size[jj])))
+
+		e_spend = e.spending	
+	
+		r.stored_energy.append(sum(e.spending)/USD_kWh)
+		
 	for j in range(len(e.size)):
-		factor = e.spending[j]/sum(e.spending)
-		factor_track.append(factor)
-		num_give_back += -r.stored_energy[0]*factor
-		e.how_much[j] -= e.how_much[j]*factor
-		# e.spending[j] += e.spending[j]*factor
-	r.stored_energy[0] += num_give_back
+		eee = pull_energy(e.how_much[j])
+		ee[jjj][j] = eee
+		r.stored_energy[0] -= eee
 
-	print(sum(factor_track))
+	print('kWh left in reserve: ', r.stored_energy[0])
 
-	# If negative in the reserve, after the conditional for loop above, this number below should be 0
-	print(r.stored_energy[0])
+	# plot or don't plot. cause I don't want to plot this every time 
+	condition = 0
+	plotornot(condition, e.spending, e.how_much, e.size)
 
+	# Take energy from other houses
+	"Since each house has a percentage that they pay to the pool of $$ for the reserve, first take a percentage of what the $$ is to the pool for each house (factor), then multiply by how much to give back to the reserve, which should be negative"
+	if r.stored_energy[0] < 0:
+		factor = 0
+		factor_track = []
+		num_give_back = 0
+		for j in range(len(e.size)):
+			factor = e.spending[j]/sum(e.spending)
+			factor_track.append(factor)
+			num_give_back += -r.stored_energy[0]*factor
+			e.how_much[j] -= e.how_much[j]*factor
+			# e.spending[j] += e.spending[j]*factor
+		r.stored_energy[0] += num_give_back
+		print(sum(factor_track))
+		# If negative in the reserve, after the conditional for loop above, this number below should be 0
+		print(r.stored_energy[0])
 
+	# reset vals
+	e.how_much, e.spending = [], []
+
+# Show plotted change over time
+plot_grow(ee)
 
