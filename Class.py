@@ -1,6 +1,10 @@
 import pandas as pd
 import csv
 import math
+import numpy as np 
+import random
+import matplotlib.pyplot as plt 
+from matplotlib.animation import FuncAnimation 
 
 class house:
 	def __init__(self, n, s): #name of house, how many people in the house
@@ -11,11 +15,11 @@ class house:
 		#initialize usage
 		self.usage = self.usage_i
 
-	def add_energy(self, e): #adds energy into the house
+	def add_energyh(self, e): #adds energy into the house
 		print("Gave house " + str(e) + " kWh") #energy added to reserve
 		self.usage += e
 
-	def sub_energy(self, e): #takes energy away from the house if it can, else explain why it can't
+	def sub_energyh(self, e): #takes energy away from the house if it can, else explain why it can't
 		if(self.usage == 0): #no energy to give 
 			print("No energy to give")
 			return False
@@ -34,11 +38,11 @@ class reserve:
 		self.name = n
 		self.energy = e
 
-	def add_energy(self, e): #add energy to the reserve
+	def add_energyr(self, e): #add energy to the reserve
 		print("Gave reserve " + str(e) + " kWh") #energy is added
 		self.energy += e
 
-	def sub_energy(self, e): #takes away energy from reserve if it can, else explain why it can't
+	def sub_energyr(self, e): #takes away energy from reserve if it can, else explain why it can't
 		if(self.energy == 0): #no energy to give 
 			print("No energy to give")
 			return False
@@ -50,13 +54,12 @@ class reserve:
 			return True
 
 def add(graph, house, reserve, energy): #adds the energy to the house 
-	if(reserve.sub_energy(energy) and check_connect(graph, house, reserve)): #checks if you can take energy from reserve 
-		house.add_energy(energy) #performs the transfer
+	if(reserve.sub_energyr(energy) and check_connect(graph, house, reserve)): #checks if you can take energy from reserve 
+		house.add_energyh(energy) #performs the transfer
 
 def sub(graph, house, reserve, energy): #adds the energy to the house
-	if(house.sub_energy(energy) and check_connect(graph, house, reserve)): #checks if you can take energy from house
-		reserve.add_energy(energy) #performs the transfer
-
+	if(house.sub_energyh(energy) and check_connect(graph, house, reserve)): #checks if you can take energy from house
+		reserve.add_energyr(energy) #performs the transfer
 
 def check_connect(graph, house, reserve): #checks if house is connected to reserve
 	if(house.name in graph[reserve.name]):
@@ -64,60 +67,29 @@ def check_connect(graph, house, reserve): #checks if house is connected to reser
 	else:
 		return False
 
+
+######################################################################################################################################
+def money_to_energy():
+	S_upper = 80
+	S_lower = 50
+	num = random.randint(S_lower, S_upper)
+	return num
+
+def pull_energy(N):  # N is the money put in per month
+	# amount to pull
+	am_to_pull = N + random.randint(-10, 10)  # kWh
+	return am_to_pull
+
+
+######################################################################################################################################
 #####################################################
 #                   Test Cases                      #
 #####################################################
-'''
-h1 = house('1', 1) 
-h2 = house('2', 2)
-h3 = house('3', 3)
-
-r1 = reserve('1r', 300)
-
-#graph = {r1: [h1, h2, h3]}
-
-#add(graph, h1, r1, 30)
-
-print(h1.usage)
-
-h1.net_change()
-
-h = []
-
-r = []
-#r.append(r1)
-for i in range(0,50):
-	h.append(house(i, i))
-
-for i in range(0,10):
-	r.append(reserve(i, i+300))
-
-#print(r)
-
-print(h[9].name)
-
-print(h[1].usage)
-#add(graph, h[3], r[0], 30)
-graph = {}
-for i in range(0,10):
-	for j in range(0,5):
-		if(r[i].name not in graph):
-			graph[r[i].name] = [h[j+(i*5)].name]
-		else:
-			graph[r[i].name].append(h[j+(i*5)].name)
-
-print(check_connect(graph, h[8], r[0]))
-print(h[0].usage)
-add(graph, h[0], r[0], 30)
-print(h[0].usage)
-#print(h[3].name)
-#print(graph[r[0].name])
-#print(graph)
-'''
 
 h = []
 r = []
 graph = {}
+kWh = 1.26
 
 with open('hhSizeAndName.csv') as data:
 	csvReader = csv.reader(data)
@@ -127,7 +99,7 @@ with open('hhSizeAndName.csv') as data:
 
 numReserve = math.ceil(len(h)/10)
 for i in range(0, numReserve):
-	r.append(reserve("r"+str(i), 300))
+	r.append(reserve("r"+str(i), money_to_energy()))
 
 for i in range(0,numReserve):
 	for j in range(0,10):
@@ -139,4 +111,19 @@ for i in range(0,numReserve):
 		except:
 			pass
 
+for i in range(0,len(h)):
+	h[i].usage += pull_energy(kWh*h[i].usage_i)
+
+for i in range(0, numReserve):
+	for j in range(0,numReserve):
+		if(r[j].name not in graph[r[i].name] and r[j].name != r[i].name):
+					graph[r[i].name].append(r[j].name)
+
+#print(graph[r[1].name])
 print(graph)
+
+
+print(h[5].usage)
+print(r[0].energy)
+add(graph, h[0], r[0], 30)
+sub(graph, h[0], r[0], 30)
