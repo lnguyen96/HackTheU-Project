@@ -6,7 +6,7 @@ Our project uses a graph data structure to model redistribution of excess renewa
 
 Since our project only uses python3, those will currently be the only files you need to run. If you do not have python3 installed, we would recommend installing the [Anaconda](https://www.anaconda.com/download/) package for your OS.
 
-## Generating visuals from our numerical data
+## Generating visuals from random numerical data for one reserve
 
 If you wish to generate the visuals used in our project, change your current directory to our copy of HackTheU Project and run the command 
 
