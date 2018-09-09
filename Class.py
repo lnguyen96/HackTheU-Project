@@ -1,3 +1,7 @@
+import pandas as pd
+import csv
+import math
+
 class house:
 	def __init__(self, n, s): #name of house, how many people in the house
 		self.name = n
@@ -63,7 +67,7 @@ def check_connect(graph, house, reserve): #checks if house is connected to reser
 #####################################################
 #                   Test Cases                      #
 #####################################################
-
+'''
 h1 = house('1', 1) 
 h2 = house('2', 2)
 h3 = house('3', 3)
@@ -109,3 +113,30 @@ print(h[0].usage)
 #print(h[3].name)
 #print(graph[r[0].name])
 #print(graph)
+'''
+
+h = []
+r = []
+graph = {}
+
+with open('hhSizeAndName.csv') as data:
+	csvReader = csv.reader(data)
+	next(data)
+	for row in csvReader:
+		h.append(house(row[1],int(row[0])))
+
+numReserve = math.ceil(len(h)/10)
+for i in range(0, numReserve):
+	r.append(reserve("r"+str(i), 300))
+
+for i in range(0,numReserve):
+	for j in range(0,10):
+		try:
+			if(r[i].name not in graph):
+				graph[r[i].name] = [h[j+(i*10)].name]
+			else:
+				graph[r[i].name].append(h[j+(i*10)].name)
+		except:
+			pass
+
+print(graph)
